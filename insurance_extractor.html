@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pa">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Insurance Policy Extractor</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f7; color: #1a1a1a; min-height: 100vh; }
+  .topbar { background: #fff; border-bottom: 1px solid #e5e5e5; padding: 0 2rem; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+  .topbar-left { display: flex; align-items: center; gap: 10px; }
+  .topbar-left h1 { font-size: 17px; font-weight: 600; color: #1a1a1a; }
+  .logo { width: 32px; height: 32px; background: #534AB7; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; }
+  .main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .card { background: #fff; border-radius: 14px; border: 1px solid #e5e5e5; padding: 1.5rem; margin-bottom: 1.2rem; }
+  .section-title { font-size: 14px; font-weight: 600; color: #555; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .btn { height: 38px; padding: 0 20px; border-radius: 9px; border: 1px solid #ddd; background: #fff; color: #1a1a1a; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; transition: all 0.15s; font-family: inherit; font-weight: 500; }
+  .btn:hover { background: #f5f5f7; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-purple { background: #534AB7; color: #fff; border-color: #534AB7; }
+  .btn-purple:hover:not(:disabled) { background: #3C3489; }
+  .btn-green { background: #0F6E56; color: #fff; border-color: #0F6E56; }
+  .btn-green:hover:not(:disabled) { background: #085041; }
+  .btn-red { background: #A32D2D; color: #fff; border-color: #A32D2D; font-size: 13px; height: 32px; padding: 0 14px; }
+  .btn-red:hover { background: #791F1F; }
+  .input-row { display: flex; gap: 10px; align-items: center; }
+  input[type="text"] { flex: 1; height: 38px; padding: 0 14px; font-size: 14px; border-radius: 9px; border: 1px solid #ddd; background: #fff; color: #1a1a1a; font-family: inherit; transition: border 0.15s; }
+  input[type="text"]:focus { outline: none; border-color: #7F77DD; box-shadow: 0 0 0 3px rgba(127,119,221,0.12); }
+  .status { padding: 10px 16px; border-radius: 9px; font-size: 13px; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+  .s-info { background: #EEEDFE; color: #3C3489; border: 1px solid #AFA9EC; }
+  .s-ok { background: #E1F5EE; color: #085041; border: 1px solid #5DCAA5; }
+  .s-err { background: #FCEBEB; color: #791F1F; border: 1px solid #F09595; }
+  .s-warn { background: #FAEEDA; color: #633806; border: 1px solid #EF9F27; }
+  .spinner { width: 15px; height: 15px; border: 2px solid #AFA9EC; border-top-color: #534AB7; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1rem; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; border-radius: 8px; padding: 5px 12px; font-size: 12px; font-weight: 500; border: 1px solid #ddd; background: #f5f5f7; color: #555; }
+  .chip.done { background: #E1F5EE; border-color: #5DCAA5; color: #085041; }
+  .chip.error { background: #FCEBEB; border-color: #F09595; color: #791F1F; }
+  .chip.processing { background: #EEEDFE; border-color: #AFA9EC; color: #3C3489; }
+  .table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid #e5e5e5; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 750px; }
+  thead tr { background: #f9f9fb; }
+  th { padding: 11px 12px; text-align: left; font-weight: 600; color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid #e5e5e5; white-space: nowrap; }
+  td { border-bottom: 1px solid #f0f0f0; vertical-align: middle; padding: 0; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fafafa; }
+  td input { width: 100%; height: 36px; padding: 0 12px; font-size: 13px; background: transparent; border: none; color: #1a1a1a; font-family: inherit; }
+  td input:focus { outline: none; background: #EEEDFE; color: #3C3489; }
+  .del-btn { width: 30px; height: 30px; margin: 3px; border-radius: 7px; border: none; background: transparent; cursor: pointer; color: #bbb; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .del-btn:hover { background: #FCEBEB; color: #A32D2D; }
+  .bottom-row { display: flex; gap: 10px; margin-top: 1rem; flex-wrap: wrap; align-items: center; }
+  .count { font-size: 13px; color: #888; margin-left: auto; }
+  .empty { padding: 3rem; text-align: center; color: #aaa; font-size: 14px; }
+  .empty i { font-size: 36px; display: block; margin-bottom: 10px; color: #ccc; }
+  .login-center { text-align: center; padding: 3rem 1rem; }
+  .login-center i { font-size: 48px; color: #534AB7; display: block; margin-bottom: 1rem; }
+  .login-center p { color: #888; font-size: 14px; margin-bottom: 1.5rem; }
+  .user-bar { display: flex; align-items: center; justify-content: space-between; }
+  .user-info { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #333; }
+  .user-info i { color: #0F6E56; font-size: 18px; }
+  #loginSection, #mainSection { display: none; }
+  th:nth-child(1){width:120px} th:nth-child(2){width:145px} th:nth-child(3){width:105px} th:nth-child(4){width:105px} th:nth-child(5){width:125px} th:nth-child(6){width:135px} th:nth-child(7){width:44px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo"><i class="ti ti-file-text"></i></div>
+    <h1>Insurance Policy Extractor</h1>
+  </div>
+</div>
+
+<div class="main">
+
+  <div id="loginSection">
+    <div class="card">
+      <div class="login-center">
+        <i class="ti ti-brand-google"></i>
+        <p>Google Drive ਫਾਈਲਾਂ ਪੜ੍ਹਨ ਲਈ ਪਹਿਲਾਂ login ਕਰੋ</p>
+        <button class="btn btn-purple" onclick="signIn()">
+          <i class="ti ti-brand-google"></i> Google ਨਾਲ Login ਕਰੋ
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="mainSection">
+    <div class="card">
+      <div class="user-bar">
+        <div class="user-info">
+          <i class="ti ti-user-check"></i>
+          <span id="userNameShow">Logged in</span>
+        </div>
+        <button class="btn btn-red" onclick="signOut()">
+          <i class="ti ti-logout"></i> Logout
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Folder Link ਪਾਓ</div>
+      <div class="input-row">
+        <input type="text" id="folderLink" placeholder="https://drive.google.com/drive/folders/..." />
+        <button class="btn btn-purple" onclick="startExtraction()" id="extractBtn">
+          <i class="ti ti-sparkles"></i> Extract ਕਰੋ
+        </button>
+        <button class="btn" onclick="addBlankRow()">
+          <i class="ti ti-plus"></i> Row ਜੋੜੋ
+        </button>
+      </div>
+    </div>
+
+    <div id="statusBox" style="display:none"></div>
+    <div class="chips" id="fileChips" style="display:none"></div>
+
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Policy No.</th><th>Name</th><th>Valid From</th><th>Valid Till</th><th>Premium Amount</th><th>Registration No.</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr><td colspan="7"><div class="empty"><i class="ti ti-file-import"></i>Login ਕਰੋ ਤੇ folder link ਪਾਓ</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="bottom-row">
+      <button class="btn btn-green" onclick="downloadExcel()" id="dlBtn" style="display:none">
+        <i class="ti ti-download"></i> Excel Download
+      </button>
+      <button class="btn" onclick="clearAll()" id="clearBtn" style="display:none">
+        <i class="ti ti-trash"></i> ਸਭ ਹਟਾਓ
+      </button>
+      <span class="count" id="countBadge"></span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const CLIENT_ID = '1042299833275-kob87kl0dr008bqrm3mu8u6jaf8000bs.apps.googleusercontent.com';
+const SCOPES = 'https://www.googleapis.com/auth/drive.readonly';
+let tokenClient, accessToken = null, policies = [], rowId = 0;
+
+function initGsi() {
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    callback: (resp) => {
+      if (resp.error) { showStatus('err', '⚠️ Login ਨਹੀਂ ਹੋਇਆ: ' + resp.error); return; }
+      accessToken = resp.access_token;
+      fetchUserInfo();
+    }
+  });
+  document.getElementById('loginSection').style.display = 'block';
+}
+
+function signIn() { tokenClient.requestAccessToken(); }
+
+function signOut() {
+  if (accessToken) google.accounts.oauth2.revoke(accessToken, () => {});
+  accessToken = null;
+  document.getElementById('loginSection').style.display = 'block';
+  document.getElementById('mainSection').style.display = 'none';
+}
+
+async function fetchUserInfo() {
+  try {
+    const r = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', { headers: { Authorization: 'Bearer ' + accessToken } });
+    const u = await r.json();
+    document.getElementById('userNameShow').textContent = (u.name || u.email || 'Logged in') + ' ✓';
+  } catch(e) {}
+  document.getElementById('loginSection').style.display = 'none';
+  document.getElementById('mainSection').style.display = 'block';
+}
+
+function getFolderId(url) {
+  const m = url.match(/folders\/([a-zA-Z0-9_-]+)/);
+  return m ? m[1] : null;
+}
+
+function showStatus(type, msg, spin) {
+  const box = document.getElementById('statusBox');
+  if (!type) { box.style.display = 'none'; return; }
+  const cls = { info:'s-info', ok:'s-ok', err:'s-err', warn:'s-warn' }[type];
+  box.className = 'status ' + cls;
+  box.style.display = 'flex';
+  box.innerHTML = (spin ? '<div class="spinner"></div>' : '') + '<span>' + msg + '</span>';
+}
+
+async function listPdfFiles(folderId) {
+  let files = [], pageToken = '';
+  do {
+    const url = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+mimeType='application/pdf'+and+trashed=false&fields=nextPageToken,files(id,name)&pageSize=100` + (pageToken ? '&pageToken=' + pageToken : '');
+    const r = await fetch(url, { headers: { Authorization: 'Bearer ' + accessToken } });
+    const d = await r.json();
+    if (d.error) throw new Error(d.error.message);
+    files = files.concat(d.files || []);
+    pageToken = d.nextPageToken || '';
+  } while (pageToken);
+  return files;
+}
+
+async function fetchPdfBase64(fileId) {
+  const r = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, { headers: { Authorization: 'Bearer ' + accessToken } });
+  if (!r.ok) throw new Error('Download failed ' + r.status);
+  const buf = await r.arrayBuffer();
+  let bin = '', bytes = new Uint8Array(buf);
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin);
+}
+
+async function extractFromPdf(base64) {
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
+          { type: 'text', text: `Extract these 6 fields from this insurance policy PDF and return ONLY valid JSON, no markdown, no explanation:\n{"policy_no":"...","name":"...","valid_from":"DD/MM/YYYY","valid_till":"DD/MM/YYYY","premium_amount":"...","registration_no":"..."}\nIf a field is not found, use "N/A". Return ONLY the JSON object.` }
+        ]
+      }]
+    })
+  });
+  const data = await resp.json();
+  const text = data.content.map(i => i.text || '').join('');
+  return JSON.parse(text.replace(/```json|```/g, '').trim());
+}
+
+async function startExtraction() {
+  const link = document.getElementById('folderLink').value.trim();
+  if (!link) { showStatus('err', '⚠️ Folder link ਪਾਓ'); return; }
+  const folderId = getFolderId(link);
+  if (!folderId) { showStatus('err', '⚠️ ਇਹ valid Drive folder link ਨਹੀਂ'); return; }
+  document.getElementById('extractBtn').disabled = true;
+  document.getElementById('fileChips').style.display = 'none';
+  showStatus('info', 'Folder ਵਿੱਚੋਂ PDFs ਲੱਭੀਆਂ ਜਾ ਰਹੀਆਂ ਹਨ...', true);
+  let files;
+  try { files = await listPdfFiles(folderId); }
+  catch(e) { showStatus('err', '⚠️ Folder ਨਹੀਂ ਖੁੱਲ੍ਹਿਆ: ' + e.message); document.getElementById('extractBtn').disabled = false; return; }
+  if (!files.length) { showStatus('warn', '⚠️ ਇਸ folder ਵਿੱਚ ਕੋਈ PDF ਨਹੀਂ ਮਿਲੀ'); document.getElementById('extractBtn').disabled = false; return; }
+  showStatus('info', `${files.length} PDFs ਮਿਲੀਆਂ। Extract ਸ਼ੁਰੂ...`, true);
+  const chipsEl = document.getElementById('fileChips');
+  chipsEl.style.display = 'flex';
+  chipsEl.innerHTML = files.map(f => `<span class="chip" id="chip-${f.id}"><i class="ti ti-file-text"></i>${f.name}</span>`).join('');
+  let done = 0, errors = 0;
+  for (const file of files) {
+    const chip = document.getElementById('chip-' + file.id);
+    chip.className = 'chip processing';
+    chip.innerHTML = `<div class="spinner" style="border-color:#AFA9EC;border-top-color:#534AB7;width:12px;height:12px"></div>${file.name}`;
+    try {
+      const b64 = await fetchPdfBase64(file.id);
+      const parsed = await extractFromPdf(b64);
+      addRow(parsed);
+      chip.className = 'chip done';
+      chip.innerHTML = `<i class="ti ti-check"></i>${file.name}`;
+      done++;
+    } catch(e) {
+      chip.className = 'chip error';
+      chip.innerHTML = `<i class="ti ti-x"></i>${file.name}`;
+      errors++;
+    }
+    showStatus('info', `${done+errors}/${files.length} ਹੋ ਗਈਆਂ... (${errors} ਗਲਤੀਆਂ)`, true);
+  }
+  if (errors === 0) showStatus('ok', `✓ ਸਾਰੀਆਂ ${done} PDFs ਸਫ਼ਲਤਾਪੂਰਵਕ extract ਹੋਈਆਂ!`);
+  else showStatus('warn', `${done} ਸਫ਼ਲ, ${errors} ਅਸਫ਼ਲ ਰਹੀਆਂ।`);
+  document.getElementById('extractBtn').disabled = false;
+}
+
+function addRow(data) {
+  data = data || {};
+  policies.push({ id: ++rowId, ...data });
+  renderTable();
+}
+
+function addBlankRow() { addRow(); }
+
+function deleteRow(id) { policies = policies.filter(p => p.id !== id); renderTable(); }
+function updateField(id, field, val) { const p = policies.find(p => p.id === id); if (p) p[field] = val; }
+
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  const fields = ['policy_no','name','valid_from','valid_till','premium_amount','registration_no'];
+  if (!policies.length) {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty"><i class="ti ti-file-import"></i>ਕੋਈ ਡਾਟਾ ਨਹੀਂ।</div></td></tr>';
+    document.getElementById('dlBtn').style.display = 'none';
+    document.getElementById('clearBtn').style.display = 'none';
+    document.getElementById('countBadge').textContent = '';
+    return;
+  }
+  tbody.innerHTML = policies.map(p => `<tr>${fields.map(f => `<td><input type="text" value="${(p[f]||'').replace(/"/g,'&quot;')}" onchange="updateField(${p.id},'${f}',this.value)"/></td>`).join('')}<td style="text-align:center"><button class="del-btn" onclick="deleteRow(${p.id})" title="ਹਟਾਓ"><i class="ti ti-trash" style="font-size:14px"></i></button></td></tr>`).join('');
+  document.getElementById('dlBtn').style.display = 'inline-flex';
+  document.getElementById('clearBtn').style.display = 'inline-flex';
+  document.getElementById('countBadge').textContent = policies.length + ' ਪਾਲਿਸੀਆਂ';
+}
+
+function downloadExcel() {
+  const headers = ['Policy No.','Name','Valid From','Valid Till','Premium Amount','Registration No.'];
+  const fields = ['policy_no','name','valid_from','valid_till','premium_amount','registration_no'];
+  const rows = policies.map(p => fields.map(f => p[f] || ''));
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+  ws['!cols'] = headers.map(() => ({ wch: 22 }));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Insurance Policies');
+  XLSX.writeFile(wb, 'insurance_policies.xlsx');
+}
+
+function clearAll() {
+  if (confirm('ਕੀ ਤੁਸੀਂ ਸਭ ਡਾਟਾ ਹਟਾਉਣਾ ਚਾਹੁੰਦੇ ਹੋ?')) { policies = []; renderTable(); showStatus(null); }
+}
+</script>
+<script src="https://accounts.google.com/gsi/client" onload="initGsi()" async defer></script>
+</body>
+</html>
