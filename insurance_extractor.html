@@ -9,13 +9,13 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f7; color: #1a1a1a; min-height: 100vh; }
-  .topbar { background: #fff; border-bottom: 1px solid #e5e5e5; padding: 0 2rem; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+  .topbar { background: #fff; border-bottom: 1px solid #e5e5e5; padding: 0 2rem; height: 56px; display: flex; align-items: center; position: sticky; top: 0; z-index: 10; }
   .topbar-left { display: flex; align-items: center; gap: 10px; }
-  .topbar-left h1 { font-size: 17px; font-weight: 600; color: #1a1a1a; }
+  .topbar-left h1 { font-size: 17px; font-weight: 600; }
   .logo { width: 32px; height: 32px; background: #534AB7; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; }
   .main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
   .card { background: #fff; border-radius: 14px; border: 1px solid #e5e5e5; padding: 1.5rem; margin-bottom: 1.2rem; }
-  .section-title { font-size: 14px; font-weight: 600; color: #555; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .section-title { font-size: 12px; font-weight: 600; color: #888; margin-bottom: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
   .btn { height: 38px; padding: 0 20px; border-radius: 9px; border: 1px solid #ddd; background: #fff; color: #1a1a1a; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; transition: all 0.15s; font-family: inherit; font-weight: 500; }
   .btn:hover { background: #f5f5f7; }
   .btn:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -24,10 +24,16 @@
   .btn-green { background: #0F6E56; color: #fff; border-color: #0F6E56; }
   .btn-green:hover:not(:disabled) { background: #085041; }
   .btn-red { background: #A32D2D; color: #fff; border-color: #A32D2D; font-size: 13px; height: 32px; padding: 0 14px; }
-  .btn-red:hover { background: #791F1F; }
-  .input-row { display: flex; gap: 10px; align-items: center; }
-  input[type="text"] { flex: 1; height: 38px; padding: 0 14px; font-size: 14px; border-radius: 9px; border: 1px solid #ddd; background: #fff; color: #1a1a1a; font-family: inherit; transition: border 0.15s; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 1rem; background: #f5f5f7; border-radius: 10px; padding: 4px; }
+  .tab { flex: 1; height: 34px; border-radius: 7px; border: none; background: transparent; font-size: 13px; font-weight: 500; cursor: pointer; color: #888; font-family: inherit; transition: all 0.15s; }
+  .tab.active { background: #fff; color: #534AB7; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  textarea { width: 100%; height: 100px; padding: 10px 14px; font-size: 13px; border-radius: 9px; border: 1px solid #ddd; background: #fff; color: #1a1a1a; font-family: inherit; resize: vertical; line-height: 1.5; }
+  textarea:focus { outline: none; border-color: #7F77DD; box-shadow: 0 0 0 3px rgba(127,119,221,0.12); }
+  input[type="text"] { width: 100%; height: 38px; padding: 0 14px; font-size: 14px; border-radius: 9px; border: 1px solid #ddd; background: #fff; color: #1a1a1a; font-family: inherit; }
   input[type="text"]:focus { outline: none; border-color: #7F77DD; box-shadow: 0 0 0 3px rgba(127,119,221,0.12); }
+  .hint { font-size: 12px; color: #aaa; margin-top: 6px; }
   .status { padding: 10px 16px; border-radius: 9px; font-size: 13px; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
   .s-info { background: #EEEDFE; color: #3C3489; border: 1px solid #AFA9EC; }
   .s-ok { background: #E1F5EE; color: #085041; border: 1px solid #5DCAA5; }
@@ -36,7 +42,7 @@
   .spinner { width: 15px; height: 15px; border: 2px solid #AFA9EC; border-top-color: #534AB7; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1rem; }
-  .chip { display: inline-flex; align-items: center; gap: 6px; border-radius: 8px; padding: 5px 12px; font-size: 12px; font-weight: 500; border: 1px solid #ddd; background: #f5f5f7; color: #555; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; border-radius: 8px; padding: 5px 12px; font-size: 12px; font-weight: 500; border: 1px solid #ddd; background: #f5f5f7; color: #555; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .chip.done { background: #E1F5EE; border-color: #5DCAA5; color: #085041; }
   .chip.error { background: #FCEBEB; border-color: #F09595; color: #791F1F; }
   .chip.processing { background: #EEEDFE; border-color: #AFA9EC; color: #3C3489; }
@@ -66,14 +72,12 @@
 </style>
 </head>
 <body>
-
 <div class="topbar">
   <div class="topbar-left">
     <div class="logo"><i class="ti ti-file-text"></i></div>
     <h1>Insurance Policy Extractor</h1>
   </div>
 </div>
-
 <div class="main">
 
   <div id="loginSection">
@@ -95,22 +99,39 @@
           <i class="ti ti-user-check"></i>
           <span id="userNameShow">Logged in</span>
         </div>
-        <button class="btn btn-red" onclick="signOut()">
-          <i class="ti ti-logout"></i> Logout
-        </button>
+        <button class="btn btn-red" onclick="signOut()"><i class="ti ti-logout"></i> Logout</button>
       </div>
     </div>
 
     <div class="card">
-      <div class="section-title">Folder Link ਪਾਓ</div>
-      <div class="input-row">
-        <input type="text" id="folderLink" placeholder="https://drive.google.com/drive/folders/..." />
-        <button class="btn btn-purple" onclick="startExtraction()" id="extractBtn">
-          <i class="ti ti-sparkles"></i> Extract ਕਰੋ
-        </button>
-        <button class="btn" onclick="addBlankRow()">
-          <i class="ti ti-plus"></i> Row ਜੋੜੋ
-        </button>
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('folder')"><i class="ti ti-folder"></i> Folder Link</button>
+        <button class="tab" onclick="switchTab('files')"><i class="ti ti-files"></i> Multiple PDF Links</button>
+      </div>
+
+      <!-- Tab 1: Folder -->
+      <div class="tab-content active" id="tab-folder">
+        <div class="section-title">Folder Link ਪਾਓ</div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <input type="text" id="folderLink" placeholder="https://drive.google.com/drive/folders/..." />
+          <button class="btn btn-purple" onclick="startFolderExtraction()" id="extractFolderBtn" style="white-space:nowrap">
+            <i class="ti ti-sparkles"></i> Extract ਕਰੋ
+          </button>
+        </div>
+        <p class="hint">Folder ਵਿੱਚੋਂ ਸਾਰੀਆਂ PDFs ਆਪੇ ਲੱਭੇਗਾ</p>
+      </div>
+
+      <!-- Tab 2: Multiple Links -->
+      <div class="tab-content" id="tab-files">
+        <div class="section-title">PDF Links ਪਾਓ (ਇੱਕ ਇੱਕ ਲਾਈਨ ਜਾਂ comma ਨਾਲ)</div>
+        <textarea id="multiLinks" placeholder="https://drive.google.com/file/d/ABC/view&#10;https://drive.google.com/file/d/XYZ/view&#10;..."></textarea>
+        <div style="display:flex;gap:10px;margin-top:10px;align-items:center">
+          <button class="btn btn-purple" onclick="startMultiExtraction()" id="extractMultiBtn">
+            <i class="ti ti-sparkles"></i> Extract ਕਰੋ
+          </button>
+          <button class="btn" onclick="addBlankRow()"><i class="ti ti-plus"></i> Blank Row ਜੋੜੋ</button>
+        </div>
+        <p class="hint">ਸਾਰੇ links ਇੱਕੋ ਵਾਰ paste ਕਰੋ — comma ਜਾਂ new line ਨਾਲ</p>
       </div>
     </div>
 
@@ -121,28 +142,21 @@
       <div class="table-wrap">
         <table>
           <thead>
-            <tr>
-              <th>Policy No.</th><th>Name</th><th>Valid From</th><th>Valid Till</th><th>Premium Amount</th><th>Registration No.</th><th></th>
-            </tr>
+            <tr><th>Policy No.</th><th>Name</th><th>Valid From</th><th>Valid Till</th><th>Premium Amount</th><th>Registration No.</th><th></th></tr>
           </thead>
           <tbody id="tableBody">
-            <tr><td colspan="7"><div class="empty"><i class="ti ti-file-import"></i>Login ਕਰੋ ਤੇ folder link ਪਾਓ</div></td></tr>
+            <tr><td colspan="7"><div class="empty"><i class="ti ti-file-import"></i>Login ਕਰੋ ਤੇ links ਪਾਓ</div></td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
     <div class="bottom-row">
-      <button class="btn btn-green" onclick="downloadExcel()" id="dlBtn" style="display:none">
-        <i class="ti ti-download"></i> Excel Download
-      </button>
-      <button class="btn" onclick="clearAll()" id="clearBtn" style="display:none">
-        <i class="ti ti-trash"></i> ਸਭ ਹਟਾਓ
-      </button>
+      <button class="btn btn-green" onclick="downloadExcel()" id="dlBtn" style="display:none"><i class="ti ti-download"></i> Excel Download</button>
+      <button class="btn" onclick="clearAll()" id="clearBtn" style="display:none"><i class="ti ti-trash"></i> ਸਭ ਹਟਾਓ</button>
       <span class="count" id="countBadge"></span>
     </div>
   </div>
-
 </div>
 
 <script>
@@ -150,10 +164,15 @@ const CLIENT_ID = '1042299833275-kob87kl0dr008bqrm3mu8u6jaf8000bs.apps.googleuse
 const SCOPES = 'https://www.googleapis.com/auth/drive.readonly';
 let tokenClient, accessToken = null, policies = [], rowId = 0;
 
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='folder')||(i===1&&tab==='files')));
+  document.getElementById('tab-folder').classList.toggle('active', tab==='folder');
+  document.getElementById('tab-files').classList.toggle('active', tab==='files');
+}
+
 function initGsi() {
   tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: CLIENT_ID,
-    scope: SCOPES,
+    client_id: CLIENT_ID, scope: SCOPES,
     callback: (resp) => {
       if (resp.error) { showStatus('err', '⚠️ Login ਨਹੀਂ ਹੋਇਆ: ' + resp.error); return; }
       accessToken = resp.access_token;
@@ -164,7 +183,6 @@ function initGsi() {
 }
 
 function signIn() { tokenClient.requestAccessToken(); }
-
 function signOut() {
   if (accessToken) google.accounts.oauth2.revoke(accessToken, () => {});
   accessToken = null;
@@ -182,9 +200,22 @@ async function fetchUserInfo() {
   document.getElementById('mainSection').style.display = 'block';
 }
 
-function getFolderId(url) {
-  const m = url.match(/folders\/([a-zA-Z0-9_-]+)/);
-  return m ? m[1] : null;
+function extractFileId(url) {
+  // folder
+  let m = url.match(/folders\/([a-zA-Z0-9_-]+)/);
+  if (m) return { type: 'folder', id: m[1] };
+  // file /d/ID
+  m = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (m) return { type: 'file', id: m[1] };
+  // file id=ID
+  m = url.match(/id=([a-zA-Z0-9_-]+)/);
+  if (m) return { type: 'file', id: m[1] };
+  return null;
+}
+
+function parseLinks(text) {
+  // split by comma or newline
+  return text.split(/[\n,]+/).map(s => s.trim()).filter(s => s.length > 10);
 }
 
 function showStatus(type, msg, spin) {
@@ -223,15 +254,11 @@ async function extractFromPdf(base64) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1000,
-      messages: [{
-        role: 'user',
-        content: [
-          { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
-          { type: 'text', text: `Extract these 6 fields from this insurance policy PDF and return ONLY valid JSON, no markdown, no explanation:\n{"policy_no":"...","name":"...","valid_from":"DD/MM/YYYY","valid_till":"DD/MM/YYYY","premium_amount":"...","registration_no":"..."}\nIf a field is not found, use "N/A". Return ONLY the JSON object.` }
-        ]
-      }]
+      model: 'claude-sonnet-4-20250514', max_tokens: 1000,
+      messages: [{ role: 'user', content: [
+        { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
+        { type: 'text', text: `Extract these 6 fields from this insurance policy PDF and return ONLY valid JSON, no markdown, no explanation:\n{"policy_no":"...","name":"...","valid_from":"DD/MM/YYYY","valid_till":"DD/MM/YYYY","premium_amount":"...","registration_no":"..."}\nIf a field is not found, use "N/A". Return ONLY the JSON object.` }
+      ]}]
     })
   });
   const data = await resp.json();
@@ -239,19 +266,7 @@ async function extractFromPdf(base64) {
   return JSON.parse(text.replace(/```json|```/g, '').trim());
 }
 
-async function startExtraction() {
-  const link = document.getElementById('folderLink').value.trim();
-  if (!link) { showStatus('err', '⚠️ Folder link ਪਾਓ'); return; }
-  const folderId = getFolderId(link);
-  if (!folderId) { showStatus('err', '⚠️ ਇਹ valid Drive folder link ਨਹੀਂ'); return; }
-  document.getElementById('extractBtn').disabled = true;
-  document.getElementById('fileChips').style.display = 'none';
-  showStatus('info', 'Folder ਵਿੱਚੋਂ PDFs ਲੱਭੀਆਂ ਜਾ ਰਹੀਆਂ ਹਨ...', true);
-  let files;
-  try { files = await listPdfFiles(folderId); }
-  catch(e) { showStatus('err', '⚠️ Folder ਨਹੀਂ ਖੁੱਲ੍ਹਿਆ: ' + e.message); document.getElementById('extractBtn').disabled = false; return; }
-  if (!files.length) { showStatus('warn', '⚠️ ਇਸ folder ਵਿੱਚ ਕੋਈ PDF ਨਹੀਂ ਮਿਲੀ'); document.getElementById('extractBtn').disabled = false; return; }
-  showStatus('info', `${files.length} PDFs ਮਿਲੀਆਂ। Extract ਸ਼ੁਰੂ...`, true);
+async function processFiles(files) {
   const chipsEl = document.getElementById('fileChips');
   chipsEl.style.display = 'flex';
   chipsEl.innerHTML = files.map(f => `<span class="chip" id="chip-${f.id}"><i class="ti ti-file-text"></i>${f.name}</span>`).join('');
@@ -259,24 +274,58 @@ async function startExtraction() {
   for (const file of files) {
     const chip = document.getElementById('chip-' + file.id);
     chip.className = 'chip processing';
-    chip.innerHTML = `<div class="spinner" style="border-color:#AFA9EC;border-top-color:#534AB7;width:12px;height:12px"></div>${file.name}`;
+    chip.innerHTML = `<div class="spinner" style="border-color:#AFA9EC;border-top-color:#534AB7;width:12px;height:12px;border-width:2px;border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0"></div><span style="overflow:hidden;text-overflow:ellipsis">${file.name}</span>`;
     try {
       const b64 = await fetchPdfBase64(file.id);
       const parsed = await extractFromPdf(b64);
       addRow(parsed);
       chip.className = 'chip done';
-      chip.innerHTML = `<i class="ti ti-check"></i>${file.name}`;
+      chip.innerHTML = `<i class="ti ti-check"></i><span style="overflow:hidden;text-overflow:ellipsis">${file.name}</span>`;
       done++;
     } catch(e) {
       chip.className = 'chip error';
-      chip.innerHTML = `<i class="ti ti-x"></i>${file.name}`;
+      chip.innerHTML = `<i class="ti ti-x"></i><span style="overflow:hidden;text-overflow:ellipsis">${file.name} (${e.message})</span>`;
       errors++;
     }
-    showStatus('info', `${done+errors}/${files.length} ਹੋ ਗਈਆਂ... (${errors} ਗਲਤੀਆਂ)`, true);
+    showStatus('info', `${done+errors}/${files.length} ਹੋ ਗਈਆਂ... ✓${done} ✗${errors}`, true);
   }
   if (errors === 0) showStatus('ok', `✓ ਸਾਰੀਆਂ ${done} PDFs ਸਫ਼ਲਤਾਪੂਰਵਕ extract ਹੋਈਆਂ!`);
   else showStatus('warn', `${done} ਸਫ਼ਲ, ${errors} ਅਸਫ਼ਲ ਰਹੀਆਂ।`);
-  document.getElementById('extractBtn').disabled = false;
+}
+
+async function startFolderExtraction() {
+  const link = document.getElementById('folderLink').value.trim();
+  if (!link) { showStatus('err', '⚠️ Folder link ਪਾਓ'); return; }
+  const parsed = extractFileId(link);
+  if (!parsed || parsed.type !== 'folder') { showStatus('err', '⚠️ ਇਹ valid Drive folder link ਨਹੀਂ। /drive/folders/... ਵਾਲਾ link ਪਾਓ'); return; }
+  document.getElementById('extractFolderBtn').disabled = true;
+  showStatus('info', 'Folder ਵਿੱਚੋਂ PDFs ਲੱਭੀਆਂ ਜਾ ਰਹੀਆਂ ਹਨ...', true);
+  let files;
+  try { files = await listPdfFiles(parsed.id); }
+  catch(e) { showStatus('err', '⚠️ Folder ਨਹੀਂ ਖੁੱਲ੍ਹਿਆ: ' + e.message); document.getElementById('extractFolderBtn').disabled = false; return; }
+  if (!files.length) { showStatus('warn', '⚠️ ਇਸ folder ਵਿੱਚ ਕੋਈ PDF ਨਹੀਂ ਮਿਲੀ'); document.getElementById('extractFolderBtn').disabled = false; return; }
+  showStatus('info', `${files.length} PDFs ਮਿਲੀਆਂ। Extract ਸ਼ੁਰੂ...`, true);
+  await processFiles(files);
+  document.getElementById('extractFolderBtn').disabled = false;
+}
+
+async function startMultiExtraction() {
+  const text = document.getElementById('multiLinks').value.trim();
+  if (!text) { showStatus('err', '⚠️ ਕੋਈ link ਨਹੀਂ ਪਾਇਆ'); return; }
+  const links = parseLinks(text);
+  if (!links.length) { showStatus('err', '⚠️ Valid links ਨਹੀਂ ਮਿਲੇ'); return; }
+  const files = [];
+  for (const url of links) {
+    const parsed = extractFileId(url);
+    if (parsed && parsed.type === 'file') {
+      files.push({ id: parsed.id, name: 'PDF ' + (files.length + 1) });
+    }
+  }
+  if (!files.length) { showStatus('err', '⚠️ ਕੋਈ valid file link ਨਹੀਂ ਮਿਲਿਆ'); return; }
+  document.getElementById('extractMultiBtn').disabled = true;
+  showStatus('info', `${files.length} PDFs ਮਿਲੀਆਂ। Extract ਸ਼ੁਰੂ...`, true);
+  await processFiles(files);
+  document.getElementById('extractMultiBtn').disabled = false;
 }
 
 function addRow(data) {
@@ -284,9 +333,7 @@ function addRow(data) {
   policies.push({ id: ++rowId, ...data });
   renderTable();
 }
-
 function addBlankRow() { addRow(); }
-
 function deleteRow(id) { policies = policies.filter(p => p.id !== id); renderTable(); }
 function updateField(id, field, val) { const p = policies.find(p => p.id === id); if (p) p[field] = val; }
 
@@ -300,7 +347,7 @@ function renderTable() {
     document.getElementById('countBadge').textContent = '';
     return;
   }
-  tbody.innerHTML = policies.map(p => `<tr>${fields.map(f => `<td><input type="text" value="${(p[f]||'').replace(/"/g,'&quot;')}" onchange="updateField(${p.id},'${f}',this.value)"/></td>`).join('')}<td style="text-align:center"><button class="del-btn" onclick="deleteRow(${p.id})" title="ਹਟਾਓ"><i class="ti ti-trash" style="font-size:14px"></i></button></td></tr>`).join('');
+  tbody.innerHTML = policies.map(p => `<tr>${fields.map(f => `<td><input type="text" value="${(p[f]||'').replace(/"/g,'&quot;')}" onchange="updateField(${p.id},'${f}',this.value)"/></td>`).join('')}<td style="text-align:center"><button class="del-btn" onclick="deleteRow(${p.id})"><i class="ti ti-trash" style="font-size:14px"></i></button></td></tr>`).join('');
   document.getElementById('dlBtn').style.display = 'inline-flex';
   document.getElementById('clearBtn').style.display = 'inline-flex';
   document.getElementById('countBadge').textContent = policies.length + ' ਪਾਲਿਸੀਆਂ';
@@ -318,9 +365,10 @@ function downloadExcel() {
 }
 
 function clearAll() {
-  if (confirm('ਕੀ ਤੁਸੀਂ ਸਭ ਡਾਟਾ ਹਟਾਉਣਾ ਚਾਹੁੰਦੇ ਹੋ?')) { policies = []; renderTable(); showStatus(null); }
+  if (confirm('ਕੀ ਤੁਸੀਂ ਸਭ ਡਾਟਾ ਹਟਾਉਣਾ ਚਾਹੁੰਦੇ ਹੋ?')) { policies = []; renderTable(); showStatus(null); document.getElementById('fileChips').style.display = 'none'; }
 }
 </script>
 <script src="https://accounts.google.com/gsi/client" onload="initGsi()" async defer></script>
 </body>
 </html>
+
